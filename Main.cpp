@@ -66,6 +66,21 @@ int count;
 
 int XSize;
 int YSize;
+
+struct RemovePoint
+{
+	int left;
+	int top;
+	int right;
+	int bottom;
+
+};
+RemovePoint Rm[100];
+
+
+TCHAR PointString[256];
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
@@ -77,32 +92,67 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE: 
 
 		srand(time(NULL)); 
-		SetTimer(hWnd, 1, 1000, NULL);
+		SetTimer(hWnd, 1, 750, NULL);
 		GetClientRect(hWnd, &rect);
 		XSize = rect.right-60;
 		YSize = rect.bottom - (SIZE*5);
 		hWndMain = hWnd;
 		return 0;
 
-	case WM_TIMER:  
-		 
-		hdc = GetDC(hWnd);
-		count++;
-		CircleButton.x = rand() % XSize+ SIZE;
-		CircleButton.y = rand() % YSize + (SIZE*3);
-		hBrush = CreateSolidBrush(RGB(170, 110, 255));
-		SelectObject(hdc, hBrush);
-		Ellipse(hdc, CircleButton.x - SIZE, CircleButton.y - SIZE, CircleButton.x + SIZE, CircleButton.y + SIZE); 
+	case WM_TIMER:
+
+		InvalidateRect(hWnd, NULL, TRUE);
+
 		return 0;
- 
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps); 
+		wsprintf(PointString, TEXT("Your Point: %d"), Player.Point);
+		TextOut(hdc, 30, 50, PointString, lstrlen(PointString));
+
+
+		Rm[count].top = CircleButton.x - SIZE;
+		Rm[count].left = CircleButton.y - SIZE;
+		Rm[count].right = CircleButton.x + SIZE;
+		Rm[count].bottom = CircleButton.y + SIZE;
+		hPen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
+		SelectObject(hdc, hPen);
+		hBrush = CreateSolidBrush(RGB(255, 255, 255));
+		SelectObject(hdc, hBrush);
+		Ellipse(hdc, Rm[count].top, Rm[count].left, Rm[count].right, Rm[count].bottom);
+		  
+		 
+		if (count >= 30)
+		{
+			break;
+		}
+		else
+		{
+
+			count++;
+			CircleButton.x = rand() % XSize + SIZE;
+			CircleButton.y = rand() % YSize + (SIZE * 3);
+			hBrush = CreateSolidBrush(RGB(170, 110, 255));
+			SelectObject(hdc, hBrush);
+			Ellipse(hdc, CircleButton.x - SIZE, CircleButton.y - SIZE, CircleButton.x + SIZE, CircleButton.y + SIZE);
+
+			EndPaint(hWnd, &ps);
+		}
+		
+		return 0;
+
+
+	
 	case WM_LBUTTONDOWN:  // 마우스를 눌렀을때 
 
 		hdc = GetDC(hWnd); 
+		 
 		xPosition= LOWORD(lParam);
 		yPosition = HIWORD(lParam); 
-		if(xPosition <= CircleButton.x+30 && xPosition >= CircleButton.x - SIZE && yPosition <= CircleButton.y + SIZE && yPosition >= CircleButton.y - SIZE)
-		Player.Point++;
-		 
+		if (xPosition <= CircleButton.x + 30 && xPosition >= CircleButton.x - SIZE && yPosition <= CircleButton.y + SIZE && yPosition >= CircleButton.y - SIZE)
+		{ 
+			Player.Point++;
+		}  
+
 		break;
 
 	case WM_DESTROY:
