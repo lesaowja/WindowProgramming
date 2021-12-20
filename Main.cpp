@@ -1,11 +1,14 @@
 #include <windows.h>
 #include<time.h>
 #include<stdlib.h>
+#define SIZE 30
+
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE g_hInst;
 HWND hWndMain;
 LPCTSTR lpszClass = TEXT("Aim Hero");
-
+ 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance
 	, LPSTR lpszCmdParam, int nCmdShow)
 {
@@ -58,31 +61,50 @@ struct PlayerPoint
 PlayerPoint Player;
 int yPosition;
 int xPosition;
+
+int count;
+
+int XSize;
+int YSize;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
+	static RECT rect;
 	PAINTSTRUCT ps;
-
+	HPEN hPen;
+	HBRUSH hBrush;
 	switch (iMessage) {
 	case WM_CREATE: 
+
+		srand(time(NULL)); 
 		SetTimer(hWnd, 1, 1000, NULL);
+		GetClientRect(hWnd, &rect);
+		XSize = rect.right-60;
+		YSize = rect.bottom - (SIZE*5);
 		hWndMain = hWnd;
 		return 0;
-	case WM_TIMER:
-		srand((unsigned int)time(NULL));
-		CircleButton.x = rand() % 1000;
-		CircleButton.y = rand() % 1000; 
-		return 0;
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		EndPaint(hWnd, &ps);
-		return 0;
-	case WM_LBUTTONDOWN:  // 마우스를 눌렀을때 
-		xPosition= LOWORD(lParam);
-		yPosition = HIWORD(lParam);
 
+	case WM_TIMER:  
+		 
+		hdc = GetDC(hWnd);
+		count++;
+		CircleButton.x = rand() % XSize+ SIZE;
+		CircleButton.y = rand() % YSize + (SIZE*3);
+		hBrush = CreateSolidBrush(RGB(170, 110, 255));
+		SelectObject(hdc, hBrush);
+		Ellipse(hdc, CircleButton.x - SIZE, CircleButton.y - SIZE, CircleButton.x + SIZE, CircleButton.y + SIZE); 
+		return 0;
+ 
+	case WM_LBUTTONDOWN:  // 마우스를 눌렀을때 
+
+		hdc = GetDC(hWnd); 
+		xPosition= LOWORD(lParam);
+		yPosition = HIWORD(lParam); 
+		if(xPosition <= CircleButton.x+30 && xPosition >= CircleButton.x - SIZE && yPosition <= CircleButton.y + SIZE && yPosition >= CircleButton.y - SIZE)
 		Player.Point++;
+		 
 		break;
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
