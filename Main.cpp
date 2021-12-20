@@ -1,9 +1,10 @@
 #include <windows.h>
-
+#include<time.h>
+#include<stdlib.h>
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE g_hInst;
 HWND hWndMain;
-LPCTSTR lpszClass = TEXT("Class");
+LPCTSTR lpszClass = TEXT("Aim Hero");
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance
 	, LPSTR lpszCmdParam, int nCmdShow)
@@ -39,42 +40,49 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance
 
 //Thread Func
 DWORD WINAPI ThreadFunc(LPVOID temp)
-{
-	HDC hdc; 
-
-	ReleaseDC(hWndMain, hdc);
+{ 
 	return 0;
-}
-
+} 
 
 struct EllipsePosition
 {
 	int x;
 	int y;
 };
+EllipsePosition CircleButton;
 
 struct PlayerPoint
 {
-	int Point;
-
+	int Point; 
 };
-
+PlayerPoint Player;
+int yPosition;
+int xPosition;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
 	PAINTSTRUCT ps;
 
 	switch (iMessage) {
-	case WM_CREATE:
+	case WM_CREATE: 
+		SetTimer(hWnd, 1, 1000, NULL);
 		hWndMain = hWnd;
+		return 0;
+	case WM_TIMER:
+		srand((unsigned int)time(NULL));
+		CircleButton.x = rand() % 1000;
+		CircleButton.y = rand() % 1000; 
 		return 0;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);
 		return 0;
 	case WM_LBUTTONDOWN:  // 마우스를 눌렀을때 
-		 
-		return 0;
+		xPosition= LOWORD(lParam);
+		yPosition = HIWORD(lParam);
+
+		Player.Point++;
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
